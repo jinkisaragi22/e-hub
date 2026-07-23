@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-body bg-slate-100 text-slate-900 dark:bg-abyss dark:text-foam antialiased;
+  }
+}
+
+@layer components {
+  /* Notched top-right corner — broadcast scoreboard chrome */
+  .card {
+    @apply border border-slate-200 bg-white dark:border-tide dark:bg-depth;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+  }
+
+  /* Section heading with skewed accent bar, lower-third style */
+  .section-title {
+    @apply flex items-center gap-3 font-display text-2xl font-semibold uppercase italic tracking-wide;
+  }
+  .section-title::before {
+    content: '';
+    width: 0.45rem;
+    height: 1.4rem;
+    flex-shrink: 0;
+    background: theme('colors.current');
+    transform: skewX(-14deg);
+  }
+
+  .page-title {
+    @apply flex items-center gap-3 font-display text-4xl font-bold uppercase italic tracking-wide;
+  }
+  .page-title::before {
+    content: '';
+    width: 0.6rem;
+    height: 2.1rem;
+    flex-shrink: 0;
+    background: theme('colors.current');
+    transform: skewX(-14deg);
+    box-shadow: 0 0 18px rgba(255, 93, 31, 0.5);
+  }
+
+  /* Angled action button */
+  .btn-angled {
+    transform: skewX(-8deg);
+  }
+  .btn-angled > span {
+    display: inline-block;
+    transform: skewX(8deg);
+  }
+
+  /* Arena glow + grid backdrop for the hero */
+  .hero-glow {
+    background:
+      radial-gradient(620px 320px at 50% -40px, rgba(255, 93, 31, 0.14), transparent 70%),
+      repeating-linear-gradient(90deg, rgba(148, 163, 184, 0.06) 0 1px, transparent 1px 90px);
+  }
+
+  /* drop-shadow (not box-shadow) so the glow survives the card clip-path */
+  .glow-live {
+    filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.3));
+  }
+}
+
+@layer utilities {
+  .live-dot {
+    @apply inline-block h-2 w-2 rounded-full bg-signal;
+    animation: pulse-dot 1.4s ease-in-out infinite;
+    box-shadow: 0 0 8px rgba(244, 63, 94, 0.8);
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-dot { animation: none; }
+}

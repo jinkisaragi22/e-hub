@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  email        String     @unique
+  passwordHash String
+  createdAt    DateTime   @default(now())
+  favorites    Favorite[]
+}
+
+model Team {
+  id           Int        @id @default(autoincrement())
+  pandascoreId Int        @unique
+  name         String
+  acronym      String?
+  imageUrl     String?
+  game         String
+  fetchedAt    DateTime   @default(now())
+  players      Player[]
+  favorites    Favorite[]
+  matchesAsT1  Match[]    @relation("team1")
+  matchesAsT2  Match[]    @relation("team2")
+}
+
+model Player {
+  id           Int      @id @default(autoincrement())
+  pandascoreId Int      @unique
+  name         String
+  firstName    String?
+  lastName     String?
+  role         String?
+  nationality  String?
+  imageUrl     String?
+  teamId       Int?
+  team         Team?    @relation(fields: [teamId], references: [id])
+  fetchedAt    DateTime @default(now())
+}
+
+model Tournament {
+  id           Int       @id @default(autoincrement())
+  pandascoreId Int       @unique
+  name         String
+  game         String
+  tier         String?
+  prizePool    String?
+  beginAt      DateTime?
+  endAt        DateTime?
+  fetchedAt    DateTime  @default(now())
+  matches      Match[]
+
+  // tournament-detail extras, fetched on demand
+  standings       Json?
+  brackets        Json?
+  detailFetchedAt DateTime?
+}
+
+model Match {
+  id           Int         @id @default(autoincrement())
+  pandascoreId Int         @unique
+  name         String
+  game         String
+  status       String
+  startTime    DateTime?
+  team1Id      Int?
+  team2Id      Int?
+  team1        Team?       @relation("team1", fields: [team1Id], references: [id])
+  team2        Team?       @relation("team2", fields: [team2Id], references: [id])
+  score1       Int?
+  score2       Int?
+  tournamentId Int?
+  tournament   Tournament? @relation(fields: [tournamentId], references: [id])
+  fetchedAt    DateTime    @default(now())
+
+  // match-detail extras, fetched on demand
+  streams         Json?
+  mapGames        Json?
+  detailFetchedAt DateTime?
+}
+
+// Records when each full list sync last ran (e.g. "teams:ow"),
+// so per-row fetchedAt pollution can't fake freshness.
+model SyncMeta {
+  key      String   @id
+  syncedAt DateTime
+}
+
+model Favorite {
+  userId    Int
+  teamId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, teamId])
+}
